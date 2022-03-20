@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 import numpy as np
 import matplotlib.pyplot as plt
+from extra_keras_datasets import usps
 
 class ActiveSVMTrainer:
     '''
@@ -11,8 +12,11 @@ class ActiveSVMTrainer:
 
     Parameters
     ---
-    datasettype: string
+    traindatasettype: string
         'mnist' | 'cifar10'
+        
+    testdatasettype: string
+        'mnist' | 'usps' | 'cifar10'
 
     oraclepath: string
         path to trained tensorflow oracle
@@ -29,7 +33,7 @@ class ActiveSVMTrainer:
 
     Attributes
     ---
-    datasettype: dataset used for training
+    traindatasettype: dataset used for training
     learner_acc_history: SVC accuracy history
     n_samples: number of samples in labelled set at each classifier update
     n_samples_end: target ending number of samples in labelled set
@@ -47,8 +51,19 @@ class ActiveSVMTrainer:
     y_train_unlabelled: start labels of unlabelled x set
     y_train_unlabelled_final: ending labels of unlabelled x set
     '''
-    def __init__(self, datasettype, oraclepath, n_samples_end, start_samples):
-        self.datasettype = datasettype
+    def __init__(self, traindatasettype, testdatasettype, oraclepath, n_samples_end, start_samples):
+        self.traindatasettype = traindatasettype
+        self.testdatasettype = testdatasettype
+
+        if self.traindatasettype == 'mnist' and self.testdatasettype == 'mnist':
+            print(f'Training on mnist, testing on mnist')
+        elif self.traindatasettype == 'mnist' and self.testdatasettype == 'usps':
+            print(f'Training on mnist, testing on usps')
+        elif self.traindatasettype == 'cifar10' and self.testdatasettype == 'cifar10':
+            print(f'Training and testing with cifar10')
+        else:
+            raise Exception('Train and test combinations allowed are: 1) mnist & mnist, 2) mnist & usps, 3) cifar10 & cifar10')
+
         self.n_samples_end = n_samples_end
         self.start_samples = start_samples
         self.oraclepath = oraclepath
@@ -63,19 +78,34 @@ class ActiveSVMTrainer:
 
     def loaddata(self):
 
-        if self.datasettype == 'mnist':
+        if self.traindatasettype == 'mnist':
             (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
             x_train = (x_train[(y_train == 5) | (y_train == 7),]- 127.5) / 127.5
             # x_train = np.expand_dims(x_train, axis=3)
             y_train = y_train[(y_train == 5) | (y_train == 7)]
             y_train = np.where(y_train == 5, 0, 1).reshape((-1,1))
 
-            x_test = (x_test[(y_test == 5) | (y_test == 7),]- 127.5) / 127.5
-            # x_test = np.expand_dims(x_test, axis=3)
-            y_test = y_test[(y_test == 5) | (y_test == 7)]
-            y_test = np.where(y_test == 5, 0, 1).reshape((-1,1))
+            if self.testdatasettype == 'mnist':
+                x_test = (x_test[(y_test == 5) | (y_test == 7),]- 127.5) / 127.5
+                # x_test = np.expand_dims(x_test, axis=3)
+                y_test = y_test[(y_test == 5) | (y_test == 7)]
+                y_test = np.where(y_test == 5, 0, 1).reshape((-1,1))
 
-        elif self.datasettype == 'cifar10':
+            elif self.testdatasettype == 'usps':
+                (x_test, y_test), (_, _) = usps.load_data()
+
+                y_test = y_test.astype('int')
+                x_test = x_test[(y_test == 5) | (y_test == 7),]
+                # x_test = np.expand_dims(x_test, axis=3)
+                x_test = (x_test + 1) / 2
+                x_test = tf.image.pad_to_bounding_box(x_test,4,4,24,24)
+                x_test = tf.image.resize(x_test, [28,28])
+                x_test = (x_test * 2) - 1
+
+                y_test = y_test[(y_test == 5) | (y_test == 7)]
+                y_test = np.where(y_test == 5, 0, 1).reshape((-1,1))
+
+        elif self.traindatasettype == 'cifar10':
             (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
             y_train = np.squeeze(y_train)
             y_test = np.squeeze(y_test)
@@ -148,13 +178,13 @@ class ActiveSVMTrainer:
                 unsure_idx = self.getidxofnearesttoplane(svc, x_train_unlabelled)
                 unsure_img = x_train_unlabelled[unsure_idx]
                 # use oracle to predict uncertain sample
-                if self.datasettype == 'mnist':
+                if self.traindatasettype == 'mnist':
                     unsure_img = np.expand_dims(unsure_img, axis = 0)
                     unsure_img = np.expand_dims(unsure_img, axis = 3)
                     unsure_img = np.repeat(unsure_img, 3, axis = 3)
                     unsure_img = (tf.image.resize(unsure_img, [32,32]) + 1)/2
 
-                elif self.datasettype == 'cifar10':
+                elif self.traindatasettype == 'cifar10':
                     unsure_img = np.expand_dims(unsure_img, axis = 0)
 
                 oracle_label = np.squeeze(self.oracle.predict(unsure_img))

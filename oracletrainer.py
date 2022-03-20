@@ -62,7 +62,7 @@ class OracleTrainer:
     savepath: folder path where the trained oracle is saved
     x_test: the x of testing dataset
     x_train: the x of training dataset
-    y_testL the bales for testing dataset
+    y_test: the labels for testing dataset
     y_train: the labels for training dataset
     '''
     def __init__(self, datasettype, pretrainedtype, model_name, savepath, lr, epochs, batchsize, earlystopping_patience):
