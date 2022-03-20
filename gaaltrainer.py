@@ -122,7 +122,7 @@ class GAALTrainer:
             y_test = y_test[(y_test == 1) | (y_test == 7)]
             y_test = np.where(y_test == 1, 0, 1).reshape((-1,1))
 
-        np.random.seed(0)
+        # np.random.seed(0)
         rand_idx = np.random.choice(np.arange(x_train.shape[0]), size = self.start_samples, replace = False)
         x_train = x_train[rand_idx]
         y_train = y_train[rand_idx]

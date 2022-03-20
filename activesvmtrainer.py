@@ -14,7 +14,7 @@ class ActiveSVMTrainer:
     ---
     traindatasettype: string
         'mnist' | 'cifar10'
-        
+
     testdatasettype: string
         'mnist' | 'usps' | 'cifar10'
 
@@ -117,7 +117,7 @@ class ActiveSVMTrainer:
             y_test = y_test[(y_test == 1) | (y_test == 7)]
             y_test = np.where(y_test == 1, 0, 1).reshape((-1,1))
 
-        np.random.seed(0)
+        # np.random.seed(0)
         rand_idx = np.random.choice(np.arange(x_train.shape[0]), size = self.start_samples, replace = False)
         inverse_idx = [i for i in np.arange(x_train.shape[0]) if i not in rand_idx]
         x_train_labelled = x_train[rand_idx]
