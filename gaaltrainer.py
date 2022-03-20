@@ -165,9 +165,7 @@ class GAALTrainer:
         print(f'Classifier Accuracy Start: {acc}')
         learner_acc.append(acc)
         
-        i = 0
         while n_samples_this < n_samples_end:
-            print(f'Round {i+1}')
             # train an svc using the training set
             
             w = svc.coef_
@@ -176,10 +174,9 @@ class GAALTrainer:
             w = tf.cast(tf.reshape(tf.Variable(w), [-1]), tf.float32)
             b = tf.cast(tf.Variable(b), tf.float32)
             
-            print(f'Generating latents')
+            print(f'Generating latents and adding new samples to labelled set.')
             cnt = 0
-            zs = []
-            # perform gradient descent on SVC with random start and get 10 minimum points
+            # perform gradient descent on SVC with random start and attempt to add 10 new samples to labelled set
             while cnt < 10:
 
                 z = np.random.randn(self.latent_dim).reshape((1,-1))
@@ -199,33 +196,27 @@ class GAALTrainer:
                     opt = tf.keras.optimizers.SGD()
                     opt.apply_gradients(zip([grad], [z]))
 
-                zs.append(z.numpy())
-                cnt += 1
-            
-            print(f'Generating fake images using GAN')
-            # take the 10 minimum points and generate 10 fake images
-            zt = np.vstack(zs)
-            gen = self.generator.predict(zt)
+                zt = z.numpy()
+                gen = self.generator.predict(zt)
 
-            # use oracle to predict the label of the generated pictures
-            if self.traindatasettype == 'mnist':
-                gen_3c = np.repeat(gen, 3, axis = 3)
-                gen_3c_32 = (tf.image.resize(gen_3c, [32,32]) + 1)/2
-                oracle_labels = np.squeeze(self.oracle.predict(gen_3c_32))
-            elif self.traindatasettype == 'cifar10':
-                oracle_labels = np.squeeze(self.oracle.predict((gen + 1)/2))
-            
-            print(f'Updating training set')
-            # pick only the good generated images subject to threshold and add to training set
-            threshold = self.threshold
-            gen_good = gen[(oracle_labels < threshold) | (oracle_labels > 1-threshold)]
-            gen_good_labels = oracle_labels[(oracle_labels < threshold) | (oracle_labels > 1-threshold)]
-            gen_good_labels = np.round(gen_good_labels).astype(int)
-            gen_good_labels = np.expand_dims(gen_good_labels, axis = -1)
-
-            # append the good data to the labeled set
-            x_train = np.concatenate((x_train, gen_good), axis = 0)
-            y_train = np.concatenate((y_train, gen_good_labels), axis = 0)
+                # use oracle to predict the label of the generated picture
+                if self.traindatasettype == 'mnist':
+                    gen_3c = np.repeat(gen, 3, axis = 3)
+                    gen_3c_32 = (tf.image.resize(gen_3c, [32,32]) + 1)/2
+                    oracle_labels = np.squeeze(self.oracle.predict(gen_3c_32))
+                elif self.traindatasettype == 'cifar10':
+                    oracle_labels = np.squeeze(self.oracle.predict((gen + 1)/2))
+                
+                # pick only the good generated images subject to threshold and add to training set
+                
+                # append the good data to the labeled set
+                if (oracle_labels < self.threshold) or (oracle_labels > (1-self.threshold)):
+                    gen_good_labels = np.round(oracle_labels).astype(int)
+                    gen_good_labels = np.reshape(gen_good_labels,(1,1))
+                    x_train = np.concatenate((x_train, gen), axis = 0)
+                    y_train = np.concatenate((y_train, gen_good_labels), axis = 0)
+                    print(f'added {cnt+1}')
+                    cnt += 1
 
             n_samples_this = x_train.shape[0]
             print(f'No. of samples in training set: {n_samples_this}')
@@ -233,13 +224,11 @@ class GAALTrainer:
             n_samples.append(n_samples_this)
 
             # Update Learner
-            print(f'Classifier SVC')
+            print(f'10 new samples added, updating SVC Classifier')
             svc = self.trainsvc(x_train, y_train)
             svc_preds = svc.predict(x_test)
             acc = accuracy_score(y_test, svc_preds)
             print(f'Classifier Accuracy: {acc}\n')
             learner_acc.append(acc)
-
-            i += 1
         
         return x_train, y_train, learner_acc, n_samples
