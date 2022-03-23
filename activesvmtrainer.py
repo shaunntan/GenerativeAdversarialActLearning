@@ -4,7 +4,8 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 import numpy as np
 import matplotlib.pyplot as plt
-from extra_keras_datasets import usps
+# from extra_keras_datasets import usps
+import usps.usps as usps
 
 class ActiveSVMTrainer:
     '''
@@ -54,7 +55,7 @@ class ActiveSVMTrainer:
     def __init__(self, traindatasettype, testdatasettype, oraclepath, n_samples_end, start_samples):
         self.traindatasettype = traindatasettype
         self.testdatasettype = testdatasettype
-
+        print('Active SVM trainer')
         if self.traindatasettype == 'mnist' and self.testdatasettype == 'mnist':
             print(f'Training on mnist, testing on mnist')
         elif self.traindatasettype == 'mnist' and self.testdatasettype == 'usps':
@@ -96,10 +97,12 @@ class ActiveSVMTrainer:
 
                 y_test = y_test.astype('int')
                 x_test = x_test[(y_test == 5) | (y_test == 7),]
-                # x_test = np.expand_dims(x_test, axis=3)
+                x_test = np.expand_dims(x_test, axis=3)
                 x_test = (x_test + 1) / 2
                 x_test = tf.image.pad_to_bounding_box(x_test,4,4,24,24)
                 x_test = tf.image.resize(x_test, [28,28])
+                x_test = np.squeeze(x_test)
+                
                 x_test = (x_test * 2) - 1
 
                 y_test = y_test[(y_test == 5) | (y_test == 7)]
@@ -160,18 +163,22 @@ class ActiveSVMTrainer:
         n_samples = []
 
         n_samples_this = x_train_labelled.shape[0]
-        i = 0
+        n_samples.append(n_samples_this)
+
+        # train first svc
+        svc = self.trainsvc(x_train_labelled, y_train_labelled)
+        
+        # get test set accuracy
+        test_preds = svc.predict(self.x_test)
+        acc = accuracy_score(self.y_test, test_preds)
+        accuracy.append(acc)
+
+        print(f'Starting no. of samples in labelled set: {n_samples_this}')
+        print(f'Starting no. of samples in unlabelled set: {x_train_unlabelled.shape[0]}')
+        print(f'Starting SVC Acc: {acc}')
+
         while n_samples_this < self.n_samples_end:
-            print(f'Round {i+1}')
-            # update SVC
-            n_samples.append(x_train_labelled.shape[0])
-            svc = self.trainsvc(x_train_labelled, y_train_labelled)
-            
-            # get test set accuracy
-            test_preds = svc.predict(self.x_test)
-            acc = accuracy_score(self.y_test, test_preds)
-            accuracy.append(acc)
-            print(f'SVC Acc: {acc}')
+
             cnt = 0
             while cnt < 10:
                 # get index of most uncertain sample
@@ -199,9 +206,21 @@ class ActiveSVMTrainer:
                 x_train_unlabelled = np.delete(x_train_unlabelled, unsure_idx, axis = 0)
                 y_train_unlabelled = np.delete(y_train_unlabelled, unsure_idx, axis = 0)
                 cnt += 1
-            i += 1
-
+            
             n_samples_this = x_train_labelled.shape[0]
+            n_samples.append(n_samples_this)
+
+            # update SVC
+            svc = self.trainsvc(x_train_labelled, y_train_labelled)
+            
+            # get test set accuracy
+            test_preds = svc.predict(self.x_test)
+            acc = accuracy_score(self.y_test, test_preds)
+            accuracy.append(acc)
+            
             print(f'No. of samples in training set: {n_samples_this}')
+            print(f'SVC Acc: {acc}')
+
+        print(f'Ending no. of samples in unlabelled set: {x_train_unlabelled.shape[0]}')
 
         return x_train_labelled, y_train_labelled, x_train_unlabelled, y_train_unlabelled, accuracy, n_samples

@@ -4,7 +4,8 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 import tensorflow as tf
 from tensorflow.keras.models import load_model
-from extra_keras_datasets import usps
+# from extra_keras_datasets import usps
+import usps.usps as usps
 
 class GAALTrainer:
     '''
