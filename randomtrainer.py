@@ -19,9 +19,6 @@ class RandomTrainer:
     testdatasettype: string
         'mnist' | 'usps' | 'cifar10'
 
-    oraclepath: string
-        path to trained tensorflow oracle
-
     n_samples_end: int
         perform Active SVM training until n_samples_end number of samples in labelled set is reached.
 
@@ -30,7 +27,7 @@ class RandomTrainer:
 
     Returns
     ---
-    ActiveSVMTrainer Class
+    RandomTrainer Class
 
     Attributes
     ---
@@ -38,8 +35,6 @@ class RandomTrainer:
     learner_acc_history: SVC accuracy history
     n_samples: number of samples in labelled set at each classifier update
     n_samples_end: target ending number of samples in labelled set
-    oracle: instance of Keras.Model of oracle
-    oraclepath: path to oracle
     start_samples: starting number of samples in labelled set
     x_test: x testing set
     x_train_labelled: starting labelled x set
@@ -52,7 +47,7 @@ class RandomTrainer:
     y_train_unlabelled: start labels of unlabelled x set
     y_train_unlabelled_final: ending labels of unlabelled x set
     '''
-    def __init__(self, traindatasettype, testdatasettype, oraclepath, n_samples_end, start_samples):
+    def __init__(self, traindatasettype, testdatasettype, n_samples_end, start_samples):
         self.traindatasettype = traindatasettype
         self.testdatasettype = testdatasettype
         print('Random trainer')
@@ -67,8 +62,6 @@ class RandomTrainer:
 
         self.n_samples_end = n_samples_end
         self.start_samples = start_samples
-        self.oraclepath = oraclepath
-        self.oracle = self.loadoracle(oraclepath)
         self.x_train_labelled, self.y_train_labelled, self.x_train_unlabelled, self.y_train_unlabelled, self.x_test, self.y_test = self.loaddata()
 
         self.x_test = np.squeeze(self.x_test)
@@ -151,11 +144,6 @@ class RandomTrainer:
         idx_nearest_to_hyperplane = np.argmin(dist_list)
         
         return idx_nearest_to_hyperplane
-
-    def loadoracle(self, oraclepath):
-        oracle = load_model(oraclepath)
-        oracle.trainable = False
-        return oracle
 
     def randomtrainer(self, x_train_labelled, y_train_labelled, x_train_unlabelled, y_train_unlabelled):
         accuracy = []
