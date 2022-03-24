@@ -4,7 +4,6 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Reshape, Flatten, Conv2D, Conv2DTranspose, LeakyReLU, Dropout, BatchNormalization, ReLU
 from matplotlib import pyplot as plt
 import tensorflow as tf
-import pandas as pd
 
 class GANTrainer:
     '''

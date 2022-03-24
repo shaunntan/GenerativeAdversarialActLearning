@@ -1,10 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-
 import tensorflow as tf
-import tensorflow_datasets as tfds
-from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.applications.vgg16 import VGG16
 from tensorflow.keras.layers import Dense, Flatten
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
