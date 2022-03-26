@@ -210,13 +210,13 @@ class GAALTrainer:
                 # pick only the good generated images subject to threshold and add to training set
                 
                 # append the good data to the labeled set
-                if (oracle_labels < self.threshold) or (oracle_labels > (1-self.threshold)):
-                    gen_good_labels = np.round(oracle_labels).astype(int)
-                    gen_good_labels = np.reshape(gen_good_labels,(1,1))
-                    x_train = np.concatenate((x_train, gen), axis = 0)
-                    y_train = np.concatenate((y_train, gen_good_labels), axis = 0)
-                    print(f'added {cnt+1}')
-                    cnt += 1
+                # if (oracle_labels < self.threshold) or (oracle_labels > (1-self.threshold)):
+                gen_good_labels = np.round(oracle_labels).astype(int)
+                gen_good_labels = np.reshape(gen_good_labels,(1,1))
+                x_train = np.concatenate((x_train, gen), axis = 0)
+                y_train = np.concatenate((y_train, gen_good_labels), axis = 0)
+                print(f'added {cnt+1}')
+                cnt += 1
 
             n_samples_this = x_train.shape[0]
             print(f'No. of samples in training set: {n_samples_this}')

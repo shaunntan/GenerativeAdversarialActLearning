@@ -4,4 +4,5 @@ numpy
 pandas
 scipy
 scikit-learn
-tensorflow
+tensorflow-gpu
+dill
