@@ -10,6 +10,15 @@ class ActiveSVMTrainer:
     '''
     Perform Active SVM Training
 
+    Active SVM Training algorithm is as follows:
+        1) Train a learner using starting labelled pool
+        While no. of samples in labelled pool less than n_samples_end, repeat:
+            Repeat until 10 images selected and added to labelled pool:
+                1) Using SVC learner parameters, select an observation among unlabelled pool that is closes to the separating hyperplane
+                2) Oracle labels selected image
+                3) Add selected and labelled image to labelled pool
+            1) Update learner
+    
     Parameters
     ---
     traindatasettype: string

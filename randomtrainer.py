@@ -9,6 +9,14 @@ class RandomTrainer:
     '''
     Perform training by randomly adding new labelled samples from unlabelled pool
 
+    Randomg Sampling Training algorithm is as follows:
+        1) Train a learner using starting labelled pool
+        While no. of samples in labelled pool less than n_samples_end, repeat:
+            Repeat until 10 images selected and added to labelled pool:
+                1) Randomly select an image and its label from unlabelled pool
+                2) Add selected and labelled image to labelled pool
+            1) Update learner
+
     Parameters
     ---
     traindatasettype: string
@@ -125,23 +133,6 @@ class RandomTrainer:
         xt = x.reshape((x.shape[0],-1))
         svc = SVC(kernel='linear', probability = True, gamma=0.001).fit(xt, ytrain.ravel())
         return svc
-
-    def getidxofnearesttoplane(self, svc, unlabelleddata):
-        unlabelleddata = np.squeeze(unlabelleddata)
-        unlabelleddata = unlabelleddata.reshape((unlabelleddata.shape[0],-1))
-        
-        w = svc.coef_
-        b = svc.intercept_
-        w_norm = np.linalg.norm(w)
-        dist_list = []
-
-        for r in range(unlabelleddata.shape[0]):
-            d = np.abs(np.dot(w,unlabelleddata[r]) + b)/w_norm
-            dist_list.append(d)
-        
-        idx_nearest_to_hyperplane = np.argmin(dist_list)
-        
-        return idx_nearest_to_hyperplane
 
     def randomtrainer(self, x_train_labelled, y_train_labelled, x_train_unlabelled, y_train_unlabelled):
         accuracy = []

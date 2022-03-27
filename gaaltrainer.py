@@ -10,6 +10,17 @@ class GAALTrainer:
     '''
     Perform GAAL training
 
+    GAAL Training algorithm is as follows:
+        1) Train a learner using starting labelled pool
+        While no. of samples in labelled pool less than n_samples_end, repeat:
+            Repeat until 10 images synthesised:
+                1) Generate a random latent vector
+                2) Starting from vector in (1), perform gradient descent on SVC parameters to obtain best latent vector 
+                3) Synthesise image using GAN with best latent vector
+                2) Oracle labels synthesised image
+                3) Add synthesised and labelled images to labelled pool
+            1) Update learner
+
     Parameters
     ---
     traindatasettype: string
@@ -31,7 +42,7 @@ class GAALTrainer:
             3) Use oracle to predict labels of fake samples
             4) Subject to threshold, add good samples to training set
 
-    threshold: float
+    threshold: float (unused)
         threshold for good samples, e.g. 1e-8
 
     start_samples: int
