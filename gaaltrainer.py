@@ -204,6 +204,7 @@ class GAALTrainer:
 
                     # Calculate gradients with respect to every trainable variable
                     grad = tape.gradient(loss, z)
+
                     opt = tf.keras.optimizers.SGD()
                     opt.apply_gradients(zip([grad], [z]))
 
