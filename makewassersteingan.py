@@ -20,6 +20,9 @@ class WGANTrainer:
 
     n_epochs: int
         no. of epochs to train GAN for
+    
+    n_critic: int
+        no. of critic updates per batch (WGAN)
 
     batchsize: int
         batch size within each epoch
@@ -27,9 +30,6 @@ class WGANTrainer:
     retries: int
         no. of retry attempts to train the GAN. if GAN fails to train after max_loss_increase_epochs, training will restart.
     
-    max_loss_increase_epochs: int
-        max number of epochs with increase in GAN loss before restarting training
-
     Returns
     ---
     WGANTrainer Class
