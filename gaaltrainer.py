@@ -193,6 +193,8 @@ class GAALTrainer:
                 z = np.random.randn(self.latent_dim).reshape((1,-1))
                 z = tf.Variable(z)
 
+                opt = tf.keras.optimizers.SGD()
+
                 for _ in range(100):
                     with tf.GradientTape() as tape:
                         # Forward pass
@@ -204,8 +206,7 @@ class GAALTrainer:
 
                     # Calculate gradients with respect to every trainable variable
                     grad = tape.gradient(loss, z)
-
-                    opt = tf.keras.optimizers.SGD()
+                   
                     opt.apply_gradients(zip([grad], [z]))
 
                 zt = z.numpy()

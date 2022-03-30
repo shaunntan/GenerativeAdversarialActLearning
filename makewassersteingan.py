@@ -216,17 +216,17 @@ class WGANTrainer:
         c_model.save(self.savepath + d_filename)
 
     def generator_loss(self, fake_output):
-        gen_loss = tf.math.reduce_mean(fake_output)
+        gen_loss = -1. * tf.math.reduce_mean(fake_output)
         return gen_loss
 
     def discriminator_loss(self, real_output, fake_output):
-        loss = tf.math.reduce_mean(real_output) - tf.math.reduce_mean(fake_output)
+        loss = -1. * (tf.math.reduce_mean(real_output) - tf.math.reduce_mean(fake_output))
         return loss
 
     def train(self, dataset, latent_dim, n_epochs=200, batchsize=256, retries = 5, n_critic = 5):
         batch_per_epoch = int(dataset.shape[0] / batchsize)
         # manually enumerate epochs
-
+        
         for r in range(retries):
             print(f'Attempt:{r+1}')
             c_model = self.makecritic()
@@ -236,52 +236,47 @@ class WGANTrainer:
             g_losses = []
             g_loss_epoch = []
 
+            opt_critic = RMSprop(learning_rate=0.00005)
+            opt_generator = RMSprop(learning_rate=0.00005)
+
             for i in range(n_epochs):
                 print(f'Epoch: {i+1}')
-                # enumerate batches over the training set
                 for j in tqdm(range(batch_per_epoch)):
-
-                    ### WGAN-update critic more times than generator
+                    ### Update Critic more than Generator
                     for _ in range(n_critic):
-                        # get randomly selected 'real' samples
-                        X_real, y_real = self.gen_real(dataset, batchsize)
-                        # generate 'fake' examples
-                        X_fake, y_fake = self.gen_fake(g_model, latent_dim, batchsize)
-                        # update discriminator model weights
+                        # Get randomly selected 'real' samples
+                        X_real, _ = self.gen_real(dataset, batchsize)
+                        # Generate 'fake' examples
+                        X_fake, _ = self.gen_fake(g_model, latent_dim, batchsize)
 
-                    with tf.GradientTape() as tape:
-                        # tape.watch(c_model.trainable_variables)
-                        c_real_output = c_model(X_real, training = True)
-                        c_fake_output = c_model(X_fake, training = True)
+                        with tf.GradientTape() as tape:
+                            # tape.watch(c_model.trainable_variables)
+                            c_real_output = c_model(X_real, training = True)
+                            c_fake_output = c_model(X_fake, training = True)
 
-                        c_loss = self.discriminator_loss(c_real_output, c_fake_output)
+                            c_loss = self.discriminator_loss(c_real_output, c_fake_output)
 
-                    gradients_c_model = tape.gradient(c_loss, c_model.trainable_variables)
-                    
-                    opt = RMSprop(learning_rate=0.00005)
+                        gradients_c_model = tape.gradient(c_loss, c_model.trainable_variables)
 
-                    opt.apply_gradients(zip(gradients_c_model, c_model.trainable_variables))
+                        opt_critic.apply_gradients(zip(gradients_c_model, c_model.trainable_variables))
 
-                    # clip weights
+                    # Clip weights of Critic
                     for w in c_model.trainable_variables:
                         w.assign(tf.clip_by_value(w, -0.01, 0.01))
 
-                    # prepare points in latent space as input for the generator
-                    X_gan = self.get_latent(self.latent_dim, self.batchsize)
-                    ###WGAN- minus one labels
-                    y_gan = -np.ones((self.batchsize, 1))
+                    # Prepare points in latent space as input for the generator
+                    latents = self.get_latent(self.latent_dim, self.batchsize)
 
-                    ### WGAN-update generator
+                    ### Update Generator
                     with tf.GradientTape() as gen_tape:
                         # tape.watch(g_model.trainable_variables)
-                        generated_images = g_model(X_gan, training=True)
+                        generated_images = g_model(latents, training=True)
                         g_fake_output = c_model(generated_images, training=False)
                         g_loss = self.generator_loss(g_fake_output)
                     
                     gradients_g_model = gen_tape.gradient(g_loss, g_model.trainable_variables)
-                    opt = RMSprop(learning_rate=0.00005)
 
-                    opt.apply_gradients(zip(gradients_g_model, g_model.trainable_variables))
+                    opt_generator.apply_gradients(zip(gradients_g_model, g_model.trainable_variables))
 
                     # summarize loss on this batch
                     g_losses.append(g_loss)
