@@ -4,7 +4,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Reshape, Flatten, Conv2D, Conv2DTranspose, LeakyReLU, Dropout, BatchNormalization, ReLU
 from matplotlib import pyplot as plt
 import tensorflow as tf
-from tqdm import tqdm
+from datetime import datetime
 
 class WGANTrainer:
     '''
@@ -219,14 +219,14 @@ class WGANTrainer:
         gen_loss = -1. * tf.math.reduce_mean(fake_output)
         return gen_loss
 
-    def discriminator_loss(self, real_output, fake_output):
+    def critic_loss(self, real_output, fake_output):
         loss = -1. * (tf.math.reduce_mean(real_output) - tf.math.reduce_mean(fake_output))
         return loss
 
     def train(self, dataset, latent_dim, n_epochs=200, batchsize=256, retries = 5, n_critic = 5):
         batch_per_epoch = int(dataset.shape[0] / batchsize)
         # manually enumerate epochs
-        
+        begin=datetime.now()
         for r in range(retries):
             print(f'Attempt:{r+1}')
             c_model = self.makecritic()
@@ -241,7 +241,8 @@ class WGANTrainer:
 
             for i in range(n_epochs):
                 print(f'Epoch: {i+1}')
-                for j in tqdm(range(batch_per_epoch)):
+                start=datetime.now()
+                for j in range(batch_per_epoch):
                     ### Update Critic more than Generator
                     for _ in range(n_critic):
                         # Get randomly selected 'real' samples
@@ -254,15 +255,15 @@ class WGANTrainer:
                             c_real_output = c_model(X_real, training = True)
                             c_fake_output = c_model(X_fake, training = True)
 
-                            c_loss = self.discriminator_loss(c_real_output, c_fake_output)
+                            c_loss = self.critic_loss(c_real_output, c_fake_output)
 
                         gradients_c_model = tape.gradient(c_loss, c_model.trainable_variables)
 
                         opt_critic.apply_gradients(zip(gradients_c_model, c_model.trainable_variables))
 
-                    # Clip weights of Critic
-                    for w in c_model.trainable_variables:
-                        w.assign(tf.clip_by_value(w, -0.01, 0.01))
+                        # Clip weights of Critic
+                        for w in c_model.trainable_variables:
+                            w.assign(tf.clip_by_value(w, -0.01, 0.01))
 
                     # Prepare points in latent space as input for the generator
                     latents = self.get_latent(self.latent_dim, self.batchsize)
@@ -281,7 +282,9 @@ class WGANTrainer:
                     # summarize loss on this batch
                     g_losses.append(g_loss)
                     c_losses.append(c_loss)
-
+                    
+                print(f'Time Elapsed: {datetime.now()-begin}')
+                print(f'This Epoch: {datetime.now()-start}')
                 print('Try:%d, Epoch:%d, C_Loss=%.3f, G_Loss=%.3f\n' % (r+1, i+1, c_loss, g_loss))
                 g_loss_epoch.append(g_loss)
 
