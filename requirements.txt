@@ -4,6 +4,6 @@ numpy
 pandas
 scipy
 scikit-learn
-tensorflow-gpu
+tensorflow
 dill
 tqdm

@@ -1,6 +1,6 @@
 import numpy as np
 from tensorflow.keras.optimizers import Adam, RMSprop
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense, Reshape, Flatten, Conv2D, Conv2DTranspose, LeakyReLU, Dropout, BatchNormalization, ReLU
 from matplotlib import pyplot as plt
 import tensorflow as tf
@@ -29,6 +29,17 @@ class WGANTrainer:
 
     retries: int
         no. of retry attempts to train the GAN. if GAN fails to train after max_loss_increase_epochs, training will restart.
+
+    To continue training after a break (note: optimizers will be reset):
+
+    critic_path: string
+        path to saved critic model
+
+    generator_path: string
+        path to saved generator model
+
+    restart_epoch: string
+        the epoch to start training from
     
     Returns
     ---
@@ -53,7 +64,7 @@ class WGANTrainer:
     y_train: labels of training set
 
     '''
-    def __init__(self, datasettype, savepath, latent_dim = 100, n_epochs=200, batchsize=256, retries = 5, n_critic = 5):
+    def __init__(self, datasettype, savepath, latent_dim = 100, n_epochs=200, batchsize=256, retries = 5, n_critic = 5, critic_path = None, generator_path = None, restart_epoch = None):
         self.datasettype = datasettype
         self.savepath = savepath
         self.latent_dim = latent_dim
@@ -62,9 +73,21 @@ class WGANTrainer:
         self.retries = retries
         print(self.savepath)
         self.n_critic = n_critic
+        self.critic_path = critic_path
+        self.generator_path = generator_path
+        self.restart_epoch = restart_epoch
 
         self.x_train, self.y_train, self.x_test, self.y_test = self.loaddata()
         print('Data Loaded\n')
+
+        if (self.critic_path != None) and (self.generator_path != None):
+            print(f'Continue training from Epoch {self.restart_epoch+1} for another {n_epochs}\n')
+            self.c_model = load_model(self.critic_path)
+            self.g_model = load_model(self.generator_path)
+        elif (self.critic_path == None) and (self.generator_path == None):
+            pass
+        else:
+            raise Exception('critic_path AND generator_path must be None or critic_path AND generator_path must not be None')
 
 
         print(f'Training Wasserstein GAN with\n-{latent_dim} Latent Dimensions\n-for {n_epochs} Epochs\n-with Batch Size of {batchsize}\n-up to {retries} Retries\n')
@@ -227,10 +250,24 @@ class WGANTrainer:
         batch_per_epoch = int(dataset.shape[0] / batchsize)
         # manually enumerate epochs
         begin=datetime.now()
+        if (self.restart_epoch != None) and (self.critic_path != None) and (self.generator_path != None):
+            startepoch =  self.restart_epoch + 1
+        else:
+            startepoch =  0
+
+        endepoch = startepoch + self.n_epochs
+
         for r in range(retries):
             print(f'Attempt:{r+1}')
-            c_model = self.makecritic()
-            g_model = self.makegenerator(latent_dim)
+
+            if (self.critic_path == None) and (self.generator_path == None) and (self.restart_epoch == None):
+                c_model = self.makecritic()
+                g_model = self.makegenerator(latent_dim)
+            elif (self.critic_path != None) and (self.generator_path != None) and (self.restart_epoch != None):
+                c_model = self.c_model
+                g_model = self.g_model
+            else:
+                raise Exception('critic_path AND generator_path must be None or critic_path AND generator_path must not be None')
 
             c_losses = []
             g_losses = []
@@ -239,7 +276,7 @@ class WGANTrainer:
             opt_critic = RMSprop(learning_rate=0.00005)
             opt_generator = RMSprop(learning_rate=0.00005)
 
-            for i in range(n_epochs):
+            for i in range(startepoch, endepoch):
                 print(f'Epoch: {i+1}')
                 start=datetime.now()
                 for j in range(batch_per_epoch):
