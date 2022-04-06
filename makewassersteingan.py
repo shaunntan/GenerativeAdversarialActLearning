@@ -251,7 +251,7 @@ class WGANTrainer:
         # manually enumerate epochs
         begin=datetime.now()
         if (self.restart_epoch != None) and (self.critic_path != None) and (self.generator_path != None):
-            startepoch =  self.restart_epoch + 1
+            startepoch =  self.restart_epoch
         else:
             startepoch =  0
 
@@ -277,7 +277,7 @@ class WGANTrainer:
             opt_generator = RMSprop(learning_rate=0.00005)
 
             for i in range(startepoch, endepoch):
-                print(f'Epoch: {i+1}')
+                print(f'Epoch: {i}')
                 start=datetime.now()
                 for j in range(batch_per_epoch):
                     ### Update Critic more than Generator
