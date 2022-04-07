@@ -329,7 +329,7 @@ class WGANTrainer:
                 if (i+1) % 20 == 0:
                     self.performance(i, g_model, c_model, dataset, latent_dim)
                 
-                if i == self.n_epochs - 1:
+                if i == endepoch - 1:
                     return g_model, c_model, c_losses, g_losses
 
         # reach here if fail to train
