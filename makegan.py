@@ -56,7 +56,7 @@ class GANTrainer:
     y_train: labels of training set
 
     '''
-    def __init__(self, datasettype, savepath, latent_dim = 100, n_epochs=200, batchsize=256, retries = 5, max_loss_increase_epochs = 10):
+    def __init__(self, datasettype, savepath, latent_dim = 100, n_epochs=200, batchsize=256, retries = 5, max_loss_increase_epochs = 10, double_last = None):
         self.max_loss_increase_epochs = max_loss_increase_epochs
         self.datasettype = datasettype
         self.savepath = savepath
@@ -67,6 +67,7 @@ class GANTrainer:
         self.retries = retries
         print(self.savepath)
         self.gan = None
+        self.double_last = double_last
 
         x_train, y_train, x_test, y_test = self.loaddata()
         print('Data Loaded\n')
@@ -159,6 +160,9 @@ class GANTrainer:
 
         elif self.datasettype == 'cifar10':
             n_nodes = 256 * 4 * 4
+            mult = 1
+            if self.double_last == True:
+                mult = 2
             model.add(Dense(n_nodes, input_dim=latent_dim))
             model.add(LeakyReLU(alpha=0.2))
             model.add(Reshape((4, 4, 256)))
@@ -169,7 +173,7 @@ class GANTrainer:
             model.add(Conv2DTranspose(128, (4,4), strides=(2,2), padding='same'))
             model.add(LeakyReLU(alpha=0.2))
             # upsample to 32x32
-            model.add(Conv2DTranspose(128, (4,4), strides=(2,2), padding='same'))
+            model.add(Conv2DTranspose(128 * mult, (4,4), strides=(2,2), padding='same'))
             model.add(LeakyReLU(alpha=0.2))
             # output layer
             model.add(Conv2D(3, (3,3), activation='tanh', padding='same'))

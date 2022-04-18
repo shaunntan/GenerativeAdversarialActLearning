@@ -64,7 +64,7 @@ class WGANTrainer:
     y_train: labels of training set
 
     '''
-    def __init__(self, datasettype, savepath, latent_dim = 100, n_epochs=200, batchsize=256, retries = 5, n_critic = 5, critic_path = None, generator_path = None, restart_epoch = None):
+    def __init__(self, datasettype, savepath, latent_dim = 100, n_epochs=200, batchsize=256, retries = 5, n_critic = 5, critic_path = None, generator_path = None, restart_epoch = None, double_last = None):
         self.datasettype = datasettype
         self.savepath = savepath
         self.latent_dim = latent_dim
@@ -76,6 +76,7 @@ class WGANTrainer:
         self.critic_path = critic_path
         self.generator_path = generator_path
         self.restart_epoch = restart_epoch
+        self.double_last = double_last
 
         self.x_train, self.y_train, self.x_test, self.y_test = self.loaddata()
         print('Data Loaded\n')
@@ -167,6 +168,9 @@ class WGANTrainer:
 
         elif self.datasettype == 'cifar10':
             n_nodes = 256 * 4 * 4
+            mult = 1
+            if self.double_last == True:
+                mult = 2
             model.add(Dense(n_nodes, input_dim=latent_dim))
             model.add(LeakyReLU(alpha=0.2))
             model.add(Reshape((4, 4, 256)))
@@ -177,7 +181,7 @@ class WGANTrainer:
             model.add(Conv2DTranspose(128, (4,4), strides=(2,2), padding='same'))
             model.add(LeakyReLU(alpha=0.2))
             # upsample to 32x32
-            model.add(Conv2DTranspose(128, (4,4), strides=(2,2), padding='same'))
+            model.add(Conv2DTranspose(128 * mult, (4,4), strides=(2,2), padding='same'))
             model.add(LeakyReLU(alpha=0.2))
             # output layer
             model.add(Conv2D(3, (3,3), activation='tanh', padding='same'))
