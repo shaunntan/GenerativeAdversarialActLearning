@@ -202,7 +202,7 @@ class GAALTrainer:
                         f = self.generator(z)
                         f = tf.reshape(f, [-1])
                         dot = tf.tensordot(f, w, 1) + b    
-                        loss = (dot**2)
+                        loss = tf.sqrt((dot**2))
 
                     # Calculate gradients with respect to every trainable variable
                     grad = tape.gradient(loss, z)
