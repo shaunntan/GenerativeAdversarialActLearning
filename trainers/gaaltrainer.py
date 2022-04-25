@@ -5,6 +5,7 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 # from extra_keras_datasets import usps
 import usps.usps as usps
+# from usps.usps import *
 
 class GAALTrainer:
     '''
@@ -245,3 +246,11 @@ class GAALTrainer:
             learner_acc.append(acc)
         
         return x_train, y_train, learner_acc, n_samples
+
+
+# GAAL Example - train and test on mnist 5 & 7
+gaal = GAALTrainer(traindatasettype='mnist', testdatasettype='mnist', 
+                       generatorpath='./gans/mnist/generator_model_1000.h5', 
+                       oraclepath='./oracles/mnist57.h5', 
+                       n_samples_end=350, threshold=1e-8, 
+                       start_samples=50, latent_dim=100)
