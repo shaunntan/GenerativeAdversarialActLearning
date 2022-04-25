@@ -1,5 +1,7 @@
 # README
 
+<font color="red">Please download folder "oracle"(https://drive.google.com/drive/folders/1IrhYawrGMr5eTRAm3oyR2B5ylyDpxkkk?usp=sharing) on the google drive, it is required to run the code, but we cannot share them on github cause they are too large</font>
+
 This repository is for the final project of DSA5204.  In this project we reproduce and extend the paper "Generative Adversarial Active Learning"(GAAL) http://arxiv.org/abs/1702.07956
 
 [TOC] 
@@ -19,6 +21,8 @@ pip install -r requirements.txt
 
 
 ## How to Run This Project
+
+Please open notebook xxxx.ipynb for more details.
 
 ### Get SVM Model by Active Learning 
 
