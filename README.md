@@ -11,21 +11,21 @@ This repository is for the final project of DSA5204. In this project we reproduc
 ## Repo File Structure
 
 GAAL______
-    |_ gans                              # folders containing generators from different GANs
-        |_ cifar10-dcgan                 # generators from a DC-GAN
-        |_ cifar10-doublelastlayer       # generators from a DC-GAN with a double sized last Conv2DTranspose layer
-        |_ cifar10-wgan                  # generators from a Wasserstein GAN
-        |_ cifar10-wgan-doublelastlayer  # generators from a Wasserstein GAN with a double sized last Conv2DTranspose layer
-        |_ mnist                         # generators from a DC-GAN
-    |_ oracles                           # oracles used for labelling synthetic images, please approach shaunn .dot. tan .at. gmail.com for the files to be placed in this folder.
-    |_ Report
-        |_ Assets                        # Assets used in our report
-    |_ results                           # pickle files with results from our replication and extensions, use `Read results.ipynb` to generate charts
-    |_ trainers                          # .py files used in conjunction with the Jupyter Notebook `Generative Adversarial Active Learning.ipynb` to perform various training algorithms
-    |_ usps                              # usps digits dataset used as test dataset in replication
-    Generative Adversarial Active Learning.ipynb       # main file used to review the work
-    README.md                            # this readme
-    requirements.txt                     # for installing prequisuites with pip
+    |_ gans                              # folders containing generators from different GANs  
+        |_ cifar10-dcgan                 # generators from a DC-GAN  
+        |_ cifar10-doublelastlayer       # generators from a DC-GAN with a double sized last Conv2DTranspose layer  
+        |_ cifar10-wgan                  # generators from a Wasserstein GAN  
+        |_ cifar10-wgan-doublelastlayer  # generators from a Wasserstein GAN with a double sized last Conv2DTranspose layer  
+        |_ mnist                         # generators from a DC-GAN  
+    |_ oracles                           # oracles used for labelling synthetic images, please approach shaunn .dot. tan .at. gmail.com for the files to be placed in this folder  
+    |_ Report  
+        |_ Assets                        # Assets used in our report  
+    |_ results                           # pickle files with results from our replication and extensions, use `Read results.ipynb` to generate charts  
+    |_ trainers                          # .py files used in conjunction with the Jupyter Notebook `Generative Adversarial Active Learning.ipynb` to perform various training algorithms  
+    |_ usps                              # usps digits dataset used as test dataset in replication  
+    Generative Adversarial Active Learning.ipynb       # main file used to review the work  
+    README.md                            # this readme  
+    requirements.txt                     # for installing prequisuites with pip  
 
 ## Prerequisites
 
