@@ -51,12 +51,21 @@ class GAALTrainer:
     latent_dim: int
         no. of latent dimensions for generator. must be same as generator latent_dim use when training GAN.
 
+    diversity: string
+        None (default) | 'avgdist'
+        only average distance has been implemented
+
+    L: float
+        diversity penalty \in (0,1)
+
     Returns
     ---
     GAALTrainer Class
 
     Attributes
     ---
+    diversity: average distance between fake image and labelled pool is used as a penalty
+    L: diversity penalty factor
     generator: instance of Keras.Model of generator
     learner_acc_history: SVC accuracy history
     n_samples: number of samples in labelled set at each classifer update
@@ -70,10 +79,12 @@ class GAALTrainer:
     y_train: starting set of the labesl for start_samples no. of training samples
     y_train_end: ending set of labels of training samples for SVC, include labels for generated fake samples
     '''
-    def __init__(self, traindatasettype, testdatasettype, generatorpath, oraclepath, n_samples_end, threshold, start_samples, latent_dim):
+    def __init__(self, traindatasettype, testdatasettype, generatorpath, oraclepath, n_samples_end, threshold, start_samples, latent_dim, diversity = None, L = None):
         self.traindatasettype = traindatasettype
         self.testdatasettype = testdatasettype
         self.latent_dim = latent_dim
+        self.diversity = diversity
+        self.L = L
 
         if self.traindatasettype == 'mnist' and self.testdatasettype == 'mnist':
             print(f'Training on mnist, testing on mnist')
@@ -84,6 +95,12 @@ class GAALTrainer:
         else:
             raise Exception('Train and test combinations allowed are: 1) mnist & mnist, 2) mnist & usps, 3) cifar10 & cifar10')
 
+        if self.diversity != None and self.L == None:
+            raise Exception('L cannot be none if diversity is not None')
+
+        if self.diversity != None:
+            print(f'GAAL Training with diversity penalty {self.L}')
+            
         self.threshold = threshold
         self.start_samples = start_samples
         self.x_train, self.y_train, self.x_test, self.y_test = self.loaddata()
@@ -189,6 +206,10 @@ class GAALTrainer:
             cnt = 0
             # perform gradient descent on SVC with random start and attempt to add 10 new samples to labelled set
             while cnt < 10:
+                
+                # diversity
+                if self.diversity == 'avgdist':
+                    x_train_flat = tf.keras.layers.Flatten()(tf.Variable(x_train, dtype=tf.dtypes.float32))
 
                 z = np.random.randn(self.latent_dim).reshape((1,-1))
                 z = tf.Variable(z)
@@ -202,7 +223,20 @@ class GAALTrainer:
                         f = self.generator(z)
                         f = tf.reshape(f, [-1])
                         dot = tf.tensordot(f, w, 1) + b    
-                        loss = tf.sqrt((dot**2))
+                        # loss = tf.norm(dot)
+                        
+                        # diversity
+                        if self.diversity == 'avgdist':
+                            ones = tf.ones(x_train_flat.shape[0], dtype=tf.dtypes.float32)
+                            ff = tf.tensordot(ones, f, axes = 0)
+                            d = x_train_flat - ff
+                            dd = tf.reduce_mean(tf.math.reduce_euclidean_norm(d, 1))
+
+                        # loss with diversity
+                        if self.diversity == None:
+                            loss = tf.norm(dot)
+                        elif self.diversity == 'avgdist':
+                            loss = tf.norm(dot) - self.L * dd
 
                     # Calculate gradients with respect to every trainable variable
                     grad = tape.gradient(loss, z)
