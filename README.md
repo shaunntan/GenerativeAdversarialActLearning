@@ -1,76 +1,42 @@
 # README
 
-<font color="red">Please download folder "oracle"(https://drive.google.com/drive/folders/1IrhYawrGMr5eTRAm3oyR2B5ylyDpxkkk?usp=sharing) on the google drive, it is required to run the code, but we cannot share them on github cause they are too large</font>
+<font color="red">You will need two oracles saved as .h5 to run this project. These are not included in this repo as the file size is too large. Please contact shaunn .dot. tan .at. gmail.com to obtain the files.</font>
 
-This repository is for the final project of DSA5204.  In this project we reproduce and extend the paper "Generative Adversarial Active Learning"(GAAL) http://arxiv.org/abs/1702.07956
+This repository is for the final project of DSA5204. In this project we reproduce and extend the paper titled "Generative Adversarial Active Learning" (GAAL) http://arxiv.org/abs/1702.07956.
 
-[TOC] 
+# Group Members
 
-## Group Member
+# About this Repo
 
-## Prerequisite
+## Repo File Structure
 
-Run following commands to help to set up the environment
+GAAL______
+    |_ gans                              # folders containing generators from different GANs
+        |_ cifar10-dcgan                 # generators from a DC-GAN
+        |_ cifar10-doublelastlayer       # generators from a DC-GAN with a double sized last Conv2DTranspose layer
+        |_ cifar10-wgan                  # generators from a Wasserstein GAN
+        |_ cifar10-wgan-doublelastlayer  # generators from a Wasserstein GAN with a double sized last Conv2DTranspose layer
+        |_ mnist                         # generators from a DC-GAN
+    |_ oracles                           # oracles used for labelling synthetic images, please approach shaunn .dot. tan .at. gmail.com for the files to be placed in this folder.
+    |_ Report
+        |_ Assets                        # Assets used in our report
+    |_ results                           # pickle files with results from our replication and extensions, use `Read results.ipynb` to generate charts
+    |_ trainers                          # .py files used in conjunction with the Jupyter Notebook `Generative Adversarial Active Learning.ipynb` to perform various training algorithms
+    |_ usps                              # usps digits dataset used as test dataset in replication
+    Generative Adversarial Active Learning.ipynb       # main file used to review the work
+    README.md                            # this readme
+    requirements.txt                     # for installing prequisuites with pip
+
+## Prerequisites
+
+After cloning this repository, please the following command in command prompt/terminal to ensure the that prerequisites are installed.
 
 ```python
 pip install -r requirements.txt
 ```
-
-## File Structure
-
-
-
 ## How to Run This Project
 
-Please open notebook xxxx.ipynb for more details.
+Please open the jupyter notebook named `Generative Adversarial Active Learning.ipynb` for more details.
 
-### Get SVM Model by Active Learning 
+Each .py trainer has an accompanying docstring that explains it's use.
 
-Our basic idea is to train a SVM model with "Generative Adversarial Active Learning"(GAAL) to utilize the advantages of generating more informative instances. 
-
-Following commands can help you train a SVM model with a pre-trained oracle and a pre-trained generator
-
-```python
-
-```
-
-### Train a Oracle for Active Learning
-
-In the paper "GAAL", a human oracle for delivering response of most informative queries is required. But in our project, we replace the human oracle with a high-performance neural network based on VGG16.
-
-You can run the following commands to get a new oracle with default setting.
-
-```python
-
-```
-
-### Train a Generator for Active Learning
-
-In our project we develop two ways to train a generator.
-
-**Train a Simple GAN **
-
-```python
-```
-
-**Train a Wasserstein GAN**
-
-```python
-```
-
-### Utilize Existing Model/Oracle/Generator
-
-We save the pre-train model/oracle/generator in our project, and you can utilize them with following commands
-
-**Call Oracle to classify image**
-
-```python
-```
-
-**Call Generator to generate new image**
-
-```python
-
-```
-
-**Call **
