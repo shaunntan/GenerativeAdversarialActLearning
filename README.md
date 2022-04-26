@@ -10,6 +10,7 @@ This repository is for the final project of DSA5204. In this project we reproduc
 
 ## Repo File Structure
 
+```
 GAAL______
     |_ gans                              # folders containing generators from different GANs  
         |_ cifar10-dcgan                 # generators from a DC-GAN  
@@ -26,7 +27,7 @@ GAAL______
     Generative Adversarial Active Learning.ipynb       # main file used to review the work  
     README.md                            # this readme  
     requirements.txt                     # for installing prequisuites with pip  
-
+````
 ## Prerequisites
 
 After cloning this repository, please the following command in command prompt/terminal to ensure the that prerequisites are installed.
