@@ -1,6 +1,6 @@
 # README
 
-<font color="red">You will need two oracles saved as .h5 to run this project. These are not included in this repo as the file size is too large. Please contact shaunn .dot. tan .at. gmail.com to obtain the files.</font>
+<font color="red">You will need two oracles saved as .h5 to run this project. These are not included in this repo as the file size is too large. Please contact "shaunn .dot. tan .at. gmail.com" to obtain the files.</font>
 
 This repository is for the final project of DSA5204. In this project we reproduce and extend the paper titled "Generative Adversarial Active Learning" (GAAL) http://arxiv.org/abs/1702.07956.
 
@@ -18,7 +18,7 @@ GAAL______
         |_ cifar10-wgan                  # generators from a Wasserstein GAN  
         |_ cifar10-wgan-doublelastlayer  # generators from a Wasserstein GAN with a double sized last Conv2DTranspose layer  
         |_ mnist                         # generators from a DC-GAN  
-    |_ oracles                           # oracles used for labelling synthetic images, please approach shaunn .dot. tan .at. gmail.com for the files to be placed in this folder  
+    |_ oracles                           # oracles used for labelling synthetic images, please approach "shaunn .dot. tan .at. gmail.com" for the files to be placed in this folder  
     |_ Report  
         |_ Assets                        # Assets used in our report  
     |_ results                           # pickle files with results from our replication and extensions, use `Read results.ipynb` to generate charts  
