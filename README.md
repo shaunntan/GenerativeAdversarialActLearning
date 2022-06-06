@@ -5,7 +5,13 @@
 This repository is for the final project of DSA5204. In this project we reproduce and extend the paper titled "Generative Adversarial Active Learning" (GAAL) http://arxiv.org/abs/1702.07956.
 
 # Group Members
-
+- Shaunn Tan De Hui  
+- Zhao Yuxiong  
+- Li Zitian  
+- Zhang Shaoxuan  
+- Ong Jian Ying Gary  
+- Haoyang Liu  
+    
 # About this Repo
 
 ## Repo File Structure
