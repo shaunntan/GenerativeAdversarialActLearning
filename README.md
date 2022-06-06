@@ -1,6 +1,6 @@
 # README
 
-<font color="red">You will need two oracles saved as .h5 to run this project. These are not included in this repo as the file sizes are too large. Please obtain them from "https .colon. // drive .dot. google .dot. com/file/d/134Tri3dmrs7jTds-F2__Vz6XO4rNMYhx/view?usp=sharing" or contact "shaunn .dot. tan .at. gmail.com" to obtain the files.</font>
+<font color="red">You will need two oracles saved as .h5 to run this project. These are not included in this repo as the file sizes are too large. Please contact owner of this repo for the files.
 
 This repository is for the final project of DSA5204. In this project we reproduce and extend the paper titled "Generative Adversarial Active Learning" (GAAL) http://arxiv.org/abs/1702.07956.
 
